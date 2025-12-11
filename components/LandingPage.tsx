@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggle from './ThemeToggle';
 
 export default function LandingPage() {
   const { theme } = useTheme();
@@ -16,6 +17,8 @@ export default function LandingPage() {
         isLight ? 'bg-white text-[#011623]' : 'bg-[#0A0A0A] text-gray-100'
       }`}
     >
+      {/* Theme Toggle Button */}
+      <ThemeToggle />
       {/* Orange gradient on left end - more intense (only in dark theme) */}
       {!isLight && (
         <div className="absolute left-0 top-0 w-[77px] md:w-[307px] h-full bg-gradient-to-r from-[#CC4420]/50 to-transparent pointer-events-none"></div>
