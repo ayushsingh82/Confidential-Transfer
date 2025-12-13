@@ -1,0 +1,35 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-15a4e0a5df16ec0540721d9da72bbc4a62240bbd",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/Transfer.sol": "project/contracts/Transfer.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/Transfer.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\n// Minimal ERC20 interface for USDC\ninterface IERC20 {\n    function transfer(address to, uint256 amount) external returns (bool);\n    function transferFrom(address from, address to, uint256 amount) external returns (bool);\n    function balanceOf(address account) external view returns (uint256);\n    function allowance(address owner, address spender) external view returns (uint256);\n    function approve(address spender, uint256 amount) external returns (bool);\n}\n\n/**\n * @title ConfidentialTransfer\n * @notice Contract for transferring USDC tokens on Base Sepolia\n * @dev This contract allows users to transfer USDC tokens from their wallet to another address\n */\ncontract ConfidentialTransfer {\n\n    // USDC token address on Base Sepolia\n    // Base Sepolia USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e\n    address public immutable usdcToken;\n\n    // Events\n    event TransferExecuted(\n        address indexed from,\n        address indexed to,\n        uint256 amount,\n        uint256 timestamp\n    );\n\n    event TransferFailed(\n        address indexed from,\n        address indexed to,\n        uint256 amount,\n        string reason\n    );\n\n    // Errors\n    error InvalidAddress();\n    error InvalidAmount();\n    error InsufficientBalance();\n    error TransferFailedError();\n\n    /**\n     * @notice Constructor sets the USDC token address\n     * @param _usdcToken Address of the USDC token contract on Base Sepolia\n     */\n    constructor(address _usdcToken) {\n        if (_usdcToken == address(0)) {\n            revert InvalidAddress();\n        }\n        usdcToken = _usdcToken;\n    }\n\n    /**\n     * @notice Transfer USDC from the caller's wallet to a recipient\n     * @dev User must first approve this contract to spend their USDC tokens\n     * @param recipient Address to receive the USDC tokens\n     * @param amount Amount of USDC to transfer (in USDC decimals, typically 6)\n     * @return success Boolean indicating if the transfer was successful\n     */\n    function transferUSDC(address recipient, uint256 amount) external returns (bool success) {\n        if (recipient == address(0)) {\n            revert InvalidAddress();\n        }\n        if (amount == 0) {\n            revert InvalidAmount();\n        }\n\n        IERC20 usdc = IERC20(usdcToken);\n        \n        // Check if caller has sufficient balance\n        uint256 balance = usdc.balanceOf(msg.sender);\n        if (balance < amount) {\n            revert InsufficientBalance();\n        }\n\n        // Check allowance - user must approve this contract first\n        uint256 allowance = usdc.allowance(msg.sender, address(this));\n        if (allowance < amount) {\n            revert InsufficientBalance();\n        }\n\n        // Transfer USDC from caller to recipient\n        bool transferResult = usdc.transferFrom(msg.sender, recipient, amount);\n        \n        if (!transferResult) {\n            emit TransferFailed(msg.sender, recipient, amount, \"ERC20 transfer failed\");\n            revert TransferFailedError();\n        }\n\n        emit TransferExecuted(msg.sender, recipient, amount, block.timestamp);\n        return true;\n    }\n\n    /**\n     * @notice Transfer USDC using approve/transferFrom pattern\n     * @dev User must first approve this contract to spend their USDC\n     * @param from Address to transfer USDC from\n     * @param to Address to transfer USDC to\n     * @param amount Amount of USDC to transfer\n     * @return success Boolean indicating if the transfer was successful\n     */\n    function transferUSDCFrom(address from, address to, uint256 amount) external returns (bool success) {\n        if (from == address(0) || to == address(0)) {\n            revert InvalidAddress();\n        }\n        if (amount == 0) {\n            revert InvalidAmount();\n        }\n\n        IERC20 usdc = IERC20(usdcToken);\n        \n        // Check allowance\n        uint256 allowance = usdc.allowance(from, address(this));\n        if (allowance < amount) {\n            revert InsufficientBalance();\n        }\n\n        // Transfer USDC\n        bool transferResult = usdc.transferFrom(from, to, amount);\n        \n        if (!transferResult) {\n            emit TransferFailed(from, to, amount, \"ERC20 transferFrom failed\");\n            revert TransferFailedError();\n        }\n\n        emit TransferExecuted(from, to, amount, block.timestamp);\n        return true;\n    }\n\n    /**\n     * @notice Get the USDC balance of an address\n     * @param account Address to check balance for\n     * @return balance USDC balance of the account\n     */\n    function getUSDCBalance(address account) external view returns (uint256 balance) {\n        IERC20 usdc = IERC20(usdcToken);\n        return usdc.balanceOf(account);\n    }\n\n    /**\n     * @notice Get the USDC allowance for this contract\n     * @param owner Address that owns the USDC\n     * @return allowance Amount of USDC this contract can spend on behalf of owner\n     */\n    function getUSDCAllowance(address owner) external view returns (uint256 allowance) {\n        IERC20 usdc = IERC20(usdcToken);\n        return usdc.allowance(owner, address(this));\n    }\n}\n\n"
+      }
+    }
+  }
+}

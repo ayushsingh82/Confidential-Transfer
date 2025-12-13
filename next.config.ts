@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Exclude problematic packages from server components
+  serverExternalPackages: [
+    'pino',
+    'thread-stream',
+  ],
+  // Turbopack configuration
+  turbopack: {},
 };
 
 export default nextConfig;

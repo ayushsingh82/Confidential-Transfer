@@ -1,0 +1,24 @@
+# Ignore test files
+**/test/**
+**/*.test.js
+**/*.test.ts
+**/*.test.mjs
+**/*.test.tsx
+**/test/
+**/tests/
+**/__tests__/
+**/bench.js
+**/benchmark.js
+**/LICENSE
+**/README.md
+**/*.md
+**/*.zip
+**/ts.test.ts
+**/ts/
+
+# Ignore thread-stream test files specifically
+node_modules/thread-stream/test/
+node_modules/thread-stream/bench.js
+node_modules/thread-stream/LICENSE
+node_modules/thread-stream/README.md
+
